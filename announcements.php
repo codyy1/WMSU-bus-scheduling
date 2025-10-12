@@ -1,68 +1,48 @@
 <?php
-include '../db_connect.php'; 
-// 1. Check Admin Authentication (Redirect if not logged in)
-$admin_id = $_SESSION['user_id'];
+// Public announcements listing for users
+include __DIR__ . '/../admin/db_connect.php';
 
-// 2. Handle POST request for publishing a new announcement
-$message = '';
-if (isset($_POST['publish_announcement'])) {
-    // Get Title and Content
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-    
-    $sql = "INSERT INTO Announcements (Title, Content, CreatedBy) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $title, $content, $admin_id);
-    if ($stmt->execute()) {
-        $message = "Announcement published successfully!";
-    } else {
-        $message = "Error publishing announcement.";
-    }
-}
-
-// 3. Fetch all Announcements for display
-$announcements_query = "SELECT a.*, u.FirstName FROM Announcements a JOIN Users u ON a.CreatedBy = u.UserID ORDER BY PublishDate DESC";
+// Fetch announcements joined with creator name
+$announcements_query = "SELECT a.*, u.FirstName, u.LastName FROM Announcements a JOIN Users u ON a.CreatedBy = u.UserID ORDER BY PublishDate DESC";
 $announcements_result = $conn->query($announcements_query);
 ?>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WMSU Bus Announcements</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <style>
+        .announcement-card { border-radius:8px; padding:16px; margin-bottom:16px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        .announcement-meta { font-size:0.9rem; color:#666; margin-top:10px; }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <a href="schedule_view.php">Schedules</a>
+    <a href="announcement_user.php" class="active">Announcements</a>
+        <a href="logout.php">Logout</a>
+    </nav>
+</header>
 <div class="container">
-    <h1>Announcements Management</h1>
-    <?php if ($message): ?><div class="alert-success"><?php echo $message; ?></div><?php endif; ?>
+    <h1>Official WMSU Bus Announcements</h1>
 
-    <h2>Publish New Announcement</h2>
-    <form method="POST">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" required>
+    <?php if ($announcements_result && $announcements_result->num_rows > 0): ?>
+        <?php while ($row = $announcements_result->fetch_assoc()): ?>
+            <div class="announcement-card">
+                <h3><?php echo htmlspecialchars($row['Title']); ?></h3>
+                <p><?php echo nl2br(htmlspecialchars($row['Content'])); ?></p>
+                <div class="announcement-meta">
+                    Published: <?php echo date("F j, Y, g:i A", strtotime($row['PublishDate'])); ?>
+                    by <?php echo htmlspecialchars(trim($row['FirstName'] . ' ' . $row['LastName'])); ?>
+                </div>
+            </div>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <p>There are no current announcements from the WMSU Transport Office. Please check the schedules page for trip information.</p>
+    <?php endif; ?>
 
-        <label for="content">Content</label>
-        <textarea id="content" name="content" rows="4" required></textarea>
-        
-        <button type="submit" name="publish_announcement" class="btn">Publish</button>
-    </form>
-    
-    <hr>
-
-    <h2>Existing Announcements</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Published By</th>
-                <th>Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = $announcements_result->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo $row['Title']; ?></td>
-                <td><?php echo $row['FirstName']; ?></td>
-                <td><?php echo date("Y-m-d h:i A", strtotime($row['PublishDate'])); ?></td>
-                <td>
-                    <a href="edit_announcement.php?id=<?php echo $row['AnnouncementID']; ?>" class="btn">Edit</a>
-                </td>
-            </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
 </div>
+</body>
+</html>

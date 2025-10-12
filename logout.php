@@ -1,5 +1,5 @@
 <?php
-// Admin logout: destroy session and redirect to admin login
+// User logout: destroy session and redirect to user login
 session_start();
 // Unset all session variables
 $_SESSION = array();
@@ -14,7 +14,7 @@ if (ini_get("session.use_cookies")) {
 // Finally destroy the session
 session_destroy();
 
-// Redirect to admin login
+// Redirect to user login
 header('Location: index.php');
 exit();
 
