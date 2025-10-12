@@ -1,6 +1,7 @@
 <?php
-include '../db_connect.php';
-// Check if admin is logged in
+
+include __DIR__ . '/db_connect.php';
+
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
     header("Location: index.php");
     exit();
@@ -11,7 +12,7 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard - WMSU Transport</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/styles.css">
 </head>
 <body>
 <header>
@@ -19,6 +20,7 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
         <a href="dashboard.php">Dashboard</a>
         <a href="manage_routes.php">Routes & Stops</a>
         <a href="manage_schedules.php">Schedules</a>
+        <a href="announcements.php">Announcements</a>
         <a href="logout.php">Logout</a>
     </nav>
 </header>
