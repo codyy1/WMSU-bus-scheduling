@@ -1,48 +1,106 @@
 <?php
-// Public announcements listing for users
-include __DIR__ . '/../admin/db_connect.php';
+include __DIR__ . '/db_connect.php'; 
 
-// Fetch announcements joined with creator name
-$announcements_query = "SELECT a.*, u.FirstName, u.LastName FROM Announcements a JOIN Users u ON a.CreatedBy = u.UserID ORDER BY PublishDate DESC";
+if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
+    header("Location: index.php");
+    exit();
+}
+$admin_id = $_SESSION['user_id'];
+
+$message = '';
+
+
+if (isset($_POST['publish_announcement'])) {
+    $title = $_POST['title'] ?? '';
+    $content = $_POST['content'] ?? '';
+    $sql = "INSERT INTO Announcements (Title, Content, CreatedBy) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssi", $title, $content, $admin_id);
+    if ($stmt->execute()) {
+        $message = "Announcement published successfully! ✅";
+    } else {
+        $message = "Error publishing announcement: " . $conn->error;
+    }
+}
+
+
+$announcements_query = "
+    SELECT a.*, u.FirstName 
+    FROM Announcements a 
+    JOIN Users u ON a.CreatedBy = u.UserID 
+    ORDER BY PublishDate DESC
+";
 $announcements_result = $conn->query($announcements_query);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WMSU Bus Announcements</title>
+    <title>Manage Announcements - WMSU Admin</title>
     <link rel="stylesheet" href="../styles/styles.css">
     <style>
-        .announcement-card { border-radius:8px; padding:16px; margin-bottom:16px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-        .announcement-meta { font-size:0.9rem; color:#666; margin-top:10px; }
+        .alert-success { background:#e8f5e9; padding:10px; border-radius:4px; margin-bottom:10px; }
     </style>
 </head>
 <body>
 <header>
     <nav>
-        <a href="schedule_view.php">Schedules</a>
-    <a href="announcement_user.php" class="active">Announcements</a>
+        <a href="dashboard.php">Dashboard</a>
+        <a href="manage_routes.php">Routes & Stops</a>
+        <a href="manage_schedules.php">Schedules</a>
+        <a href="announcements.php">Announcements</a>
         <a href="logout.php">Logout</a>
     </nav>
 </header>
 <div class="container">
-    <h1>Official WMSU Bus Announcements</h1>
-
-    <?php if ($announcements_result && $announcements_result->num_rows > 0): ?>
-        <?php while ($row = $announcements_result->fetch_assoc()): ?>
-            <div class="announcement-card">
-                <h3><?php echo htmlspecialchars($row['Title']); ?></h3>
-                <p><?php echo nl2br(htmlspecialchars($row['Content'])); ?></p>
-                <div class="announcement-meta">
-                    Published: <?php echo date("F j, Y, g:i A", strtotime($row['PublishDate'])); ?>
-                    by <?php echo htmlspecialchars(trim($row['FirstName'] . ' ' . $row['LastName'])); ?>
-                </div>
-            </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <p>There are no current announcements from the WMSU Transport Office. Please check the schedules page for trip information.</p>
+    <h1>Announcements Management</h1>
+    <?php if ($message): ?>
+        <div class="alert-success"><?php echo $message; ?></div>
     <?php endif; ?>
 
+    <h2>Publish New Announcement</h2>
+    <form method="POST">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="content">Content</label>
+        <textarea id="content" name="content" rows="4" required></textarea>
+        
+        <button type="submit" name="publish_announcement" class="btn">Publish</button>
+    </form>
+    
+    <hr>
+
+    <h2>Existing Announcements</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Content Snippet</th>
+                <th>Published By</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if ($announcements_result && $announcements_result->num_rows > 0): ?>
+                <?php while ($row = $announcements_result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['Title']); ?></td>
+                    <td><?php echo htmlspecialchars(substr($row['Content'], 0, 50)) . '...'; ?></td>
+                    <td><?php echo htmlspecialchars($row['FirstName']); ?></td>
+                    <td><?php echo date("Y-m-d h:i A", strtotime($row['PublishDate'])); ?></td>
+                    <td>
+                        <a href="edit_announcement.php?id=<?php echo $row['AnnouncementID']; ?>" class="btn" style="background-color: orange;">Edit</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr><td colspan="5">No announcements have been published yet.</td></tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 </div>
 </body>
 </html>
