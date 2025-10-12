@@ -15,4 +15,5 @@ if ($conn->connect_error) {
 
 // Start session for login management
 session_start();
+
 ?>
