@@ -1,19 +1,17 @@
 <?php
-include '../db_connect.php';
+include __DIR__ . '/../admin/db_connect.php';
 
-// User authentication check (if logged in, optional for viewing public schedules)
 
-// 1. Fetch all routes
 $routes_result = $conn->query("SELECT RouteID, RouteName FROM Routes WHERE IsActive = TRUE");
 
-// 2. Fetch the detailed schedule for the first route found (or a selected one)
+
 $selected_route_id = isset($_GET['route_id']) ? $_GET['route_id'] : 
     ($routes_result->num_rows > 0 ? $routes_result->fetch_assoc()['RouteID'] : null);
-$routes_result->data_seek(0); // Reset pointer for dropdown display
+$routes_result->data_seek(0); 
 
 $schedule_details = null;
 if ($selected_route_id) {
-    // Get the static stops and times for the selected route
+   
     $sql = "SELECT rs.StopOrder, s.StopName, rs.ScheduledTime
             FROM RouteStops rs
             JOIN Stops s ON rs.StopID = s.StopID
@@ -24,7 +22,7 @@ if ($selected_route_id) {
     $stmt->execute();
     $schedule_details = $stmt->get_result();
 
-    // Get today's assignment (Vehicle/Driver/Status) for this route
+    
     $today = date("Y-m-d");
     $assignment_sql = "SELECT s.DriverName, v.PlateNumber, s.Status
                        FROM Schedules s
@@ -42,7 +40,7 @@ if ($selected_route_id) {
 <head>
     <meta charset="UTF-8">
     <title>WMSU Bus Schedule</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/styles.css">
 </head>
 <body>
 <header>
