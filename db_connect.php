@@ -1,19 +1,23 @@
 <?php
-// Database connection parameters
+
 $servername = "localhost";
-$username = "root"; // CHANGE THIS
-$password = ""; // CHANGE THIS
-$dbname = "wmsu_transport"; // Use the name you created
+$username = "root"; 
+$password = ""; 
+$dbname = "wmsu_transport"; 
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+
+try {
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    
+    $conn->set_charset('utf8mb4');
+} catch (mysqli_sql_exception $e) {
+   
+    die("Database connection failed: " . $e->getMessage());
 }
 
-// Start session for login management
-session_start();
 
+session_start();
 ?>
