@@ -9,9 +9,11 @@ $selected_route_id = isset($_GET['route_id']) ? $_GET['route_id'] :
     ($routes_result->num_rows > 0 ? $routes_result->fetch_assoc()['RouteID'] : null);
 $routes_result->data_seek(0); 
 
-$schedule_details = null;
+$schedule_rows = [];
+$assignment = null;
+$selected_route_name = null;
 if ($selected_route_id) {
-   
+    // Load stops for the route (avoid get_result dependency)
     $sql = "SELECT rs.StopOrder, s.StopName, rs.ScheduledTime
             FROM RouteStops rs
             JOIN Stops s ON rs.StopID = s.StopID
@@ -20,18 +22,34 @@ if ($selected_route_id) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $selected_route_id);
     $stmt->execute();
-    $schedule_details = $stmt->get_result();
+    $stmt->bind_result($stopOrder, $stopName, $scheduledTime);
+    while ($stmt->fetch()) {
+        $schedule_rows[] = ['StopOrder' => $stopOrder, 'StopName' => $stopName, 'ScheduledTime' => $scheduledTime];
+    }
+    $stmt->close();
 
-    
+    // Get today's assignment (avoid get_result dependency)
     $today = date("Y-m-d");
     $assignment_sql = "SELECT s.DriverName, v.PlateNumber, s.Status
                        FROM Schedules s
                        JOIN Vehicles v ON s.VehicleID = v.VehicleID
-                       WHERE s.RouteID = ? AND s.DateOfService = ?";
+                       WHERE s.RouteID = ? AND s.DateOfService = ? LIMIT 1";
     $assign_stmt = $conn->prepare($assignment_sql);
     $assign_stmt->bind_param("is", $selected_route_id, $today);
     $assign_stmt->execute();
-    $assignment = $assign_stmt->get_result()->fetch_assoc();
+    $assign_stmt->bind_result($driverName, $plateNumber, $status);
+    if ($assign_stmt->fetch()) {
+        $assignment = ['DriverName' => $driverName, 'PlateNumber' => $plateNumber, 'Status' => $status];
+    }
+    $assign_stmt->close();
+
+    // Get route name for display
+    $route_q = $conn->prepare("SELECT RouteName FROM Routes WHERE RouteID = ? LIMIT 1");
+    $route_q->bind_param("i", $selected_route_id);
+    $route_q->execute();
+    $route_q->bind_result($rname);
+    if ($route_q->fetch()) $selected_route_name = $rname;
+    $route_q->close();
 }
 
 ?>
@@ -40,16 +58,10 @@ if ($selected_route_id) {
 <head>
     <meta charset="UTF-8">
     <title>WMSU Bus Schedule</title>
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../user/styles/styles.css">
 </head>
 <body>
-<header>
-    <nav>
-        <a href="schedule_view.php">Schedules</a>
-        <a href="announcements.php">Announcements</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-</header>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container">
     <h1>WMSU Bus Schedule - Daily View</h1>
 
@@ -65,9 +77,9 @@ if ($selected_route_id) {
         </select>
     </form>
     
-    <?php if ($selected_route_id && $schedule_details->num_rows > 0): ?>
+    <?php if ($selected_route_id && count($schedule_rows) > 0): ?>
         <h2>Route Details: 
-            <?php echo $assignment ? $assignment['RouteName'] : 'Selected Route'; ?>
+            <?php echo $selected_route_name ? htmlspecialchars($selected_route_name) : 'Selected Route'; ?>
         </h2>
         
         <?php if ($assignment): ?>
@@ -90,13 +102,13 @@ if ($selected_route_id) {
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = $schedule_details->fetch_assoc()): ?>
+                <?php foreach ($schedule_rows as $row): ?>
                 <tr>
-                    <td><?php echo $row['StopOrder']; ?></td>
-                    <td><?php echo $row['StopName']; ?></td>
+                    <td><?php echo htmlspecialchars($row['StopOrder']); ?></td>
+                    <td><?php echo htmlspecialchars($row['StopName']); ?></td>
                     <td>**<?php echo date("h:i A", strtotime($row['ScheduledTime'])); ?>**</td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
 
@@ -104,5 +116,6 @@ if ($selected_route_id) {
         <p>No routes are currently defined in the system.</p>
     <?php endif; ?>
 </div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
