@@ -38,21 +38,13 @@ $announcements_result = $conn->query($announcements_query);
 <head>
     <meta charset="UTF-8">
     <title>Manage Announcements - WMSU Admin</title>
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../user/styles/styles.css">
     <style>
         .alert-success { background:#e8f5e9; padding:10px; border-radius:4px; margin-bottom:10px; }
     </style>
 </head>
 <body>
-<header>
-    <nav>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="manage_routes.php">Routes & Stops</a>
-        <a href="manage_schedules.php">Schedules</a>
-        <a href="announcements.php">Announcements</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-</header>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container">
     <h1>Announcements Management</h1>
     <?php if ($message): ?>
@@ -101,6 +93,8 @@ $announcements_result = $conn->query($announcements_query);
             <?php endif; ?>
         </tbody>
     </table>
+    </table>
 </div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
