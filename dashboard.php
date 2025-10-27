@@ -12,18 +12,10 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard - WMSU Transport</title>
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../user/styles/styles.css">
 </head>
 <body>
-<header>
-    <nav>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="manage_routes.php">Routes & Stops</a>
-        <a href="manage_schedules.php">Schedules</a>
-        <a href="announcements.php">Announcements</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-</header>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container">
     <h1>Welcome, WMSU Transport Admin!</h1>
     
@@ -49,5 +41,6 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'Admin') {
     </p>
     
 </div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
