@@ -53,98 +53,102 @@ $all_stops = $conn->query("SELECT * FROM Stops ORDER BY StopName");
 
 ?>
 
-<header>
-    <nav>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="manage_routes.php">Routes & Stops</a>
-        <a href="manage_schedules.php">Schedules</a>
-        <a href="announcements.php">Announcements</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-</header>
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Routes - WMSU Transport</title>
+    <link rel="stylesheet" href="../user/styles/styles.css">
+</head>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container">
     <h1>Route & Stop Management</h1>
-    <h2>Add New Route</h2>
-    <?php if ($route_message): ?><div class="alert-success"><?php echo htmlspecialchars($route_message); ?></div><?php endif; ?>
-    <form method="POST" style="margin-bottom:2rem;">
-        <div class="form-row">
-            <label for="route_name">Route Name</label>
-            <input type="text" id="route_name" name="route_name" required placeholder="e.g. WMSU Main Gate to City Hall">
-        </div>
-        <div class="form-row">
-            <label for="start_location">Start Location</label>
-            <input type="text" id="start_location" name="start_location" required placeholder="e.g. WMSU Main Gate">
-        </div>
-        <div class="form-row">
-            <label for="end_location">End Location</label>
-            <input type="text" id="end_location" name="end_location" required placeholder="e.g. City Hall Bus Terminal">
-        </div>
-        <button type="submit" name="add_route" class="btn">Save Route</button>
-    </form>
+    <div class="card" style="margin-bottom:2rem;">
+        <h2>Add New Route</h2>
+        <?php if ($route_message): ?><div class="alert-success"><?php echo htmlspecialchars($route_message); ?></div><?php endif; ?>
+        <form method="POST">
+            <div class="form-row">
+                <label for="route_name">Route Name</label>
+                <input type="text" id="route_name" name="route_name" required placeholder="e.g. WMSU Main Gate to City Hall">
+            </div>
+            <div class="form-row">
+                <label for="start_location">Start Location</label>
+                <input type="text" id="start_location" name="start_location" required placeholder="e.g. WMSU Main Gate">
+            </div>
+            <div class="form-row">
+                <label for="end_location">End Location</label>
+                <input type="text" id="end_location" name="end_location" required placeholder="e.g. City Hall Bus Terminal">
+            </div>
+            <button type="submit" name="add_route" class="btn">Save Route</button>
+        </form>
+    </div>
 
-    <h2>Add New Stop Location</h2>
-    <?php if ($stop_message): ?><div class="alert-success"><?php echo htmlspecialchars($stop_message); ?></div><?php endif; ?>
-    <form method="POST" style="margin-bottom:2rem;">
-        <div class="form-row">
-            <label for="stop_name">Stop Name</label>
-            <input type="text" id="stop_name" name="stop_name" required placeholder="e.g. Grandstop Drop Off">
-        </div>
-        <div class="form-row">
-            <label for="description">Description</label>
-            <input type="text" id="description" name="description" required placeholder="Short description">
-        </div>
-        <div class="form-row">
-            <label for="latitude">Latitude</label>
-            <input type="number" step="any" id="latitude" name="latitude" placeholder="Optional">
-        </div>
-        <div class="form-row">
-            <label for="longitude">Longitude</label>
-            <input type="number" step="any" id="longitude" name="longitude" placeholder="Optional">
-        </div>
-        <button type="submit" name="add_stop" class="btn">Save Stop</button>
-    </form>
+    <div class="card" style="margin-bottom:2rem;">
+        <h2>Add New Stop Location</h2>
+        <?php if ($stop_message): ?><div class="alert-success"><?php echo htmlspecialchars($stop_message); ?></div><?php endif; ?>
+        <form method="POST">
+            <div class="form-row">
+                <label for="stop_name">Stop Name</label>
+                <input type="text" id="stop_name" name="stop_name" required placeholder="e.g. Grandstop Drop Off">
+            </div>
+            <div class="form-row">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" required placeholder="Short description">
+            </div>
+            <div class="form-row">
+                <label for="latitude">Latitude</label>
+                <input type="number" step="any" id="latitude" name="latitude" placeholder="Optional">
+            </div>
+            <div class="form-row">
+                <label for="longitude">Longitude</label>
+                <input type="number" step="any" id="longitude" name="longitude" placeholder="Optional">
+            </div>
+            <button type="submit" name="add_stop" class="btn">Save Stop</button>
+        </form>
+    </div>
 
-    <hr>
+    <div class="card" style="margin-bottom:2rem;">
+        <h2>Existing Routes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Route Name</th>
+                    <th>Start Location</th>
+                    <th>End Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $all_routes->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['RouteName']); ?></td>
+                    <td><?php echo htmlspecialchars($row['StartLocation']); ?></td>
+                    <td><?php echo htmlspecialchars($row['EndLocation']); ?></td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 
-    <h2>Existing Routes</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Route Name</th>
-                <th>Start Location</th>
-                <th>End Location</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = $all_routes->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['RouteName']); ?></td>
-                <td><?php echo htmlspecialchars($row['StartLocation']); ?></td>
-                <td><?php echo htmlspecialchars($row['EndLocation']); ?></td>
-            </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
-
-    <h2>Existing Stops</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Stop Name</th>
-                <th>Description</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = $all_stops->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['StopName']); ?></td>
-                <td><?php echo htmlspecialchars($row['Description']); ?></td>
-                <td><?php echo htmlspecialchars($row['Latitude']); ?></td>
-                <td><?php echo htmlspecialchars($row['Longitude']); ?></td>
-            </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
+    <div class="card">
+        <h2>Existing Stops</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stop Name</th>
+                    <th>Description</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $all_stops->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['StopName']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Description']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Latitude']); ?></td>
+                    <td><?php echo htmlspecialchars($row['Longitude']); ?></td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
