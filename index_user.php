@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>User Login - WMSU Transport</title>
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../user/styles/styles.css">
 </head>
 <body>
 <div class="container" style="max-width: 400px; margin-top: 100px;">
