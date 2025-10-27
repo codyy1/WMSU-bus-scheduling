@@ -11,20 +11,14 @@ $announcements_result = $conn->query($announcements_query);
 <head>
     <meta charset="UTF-8">
     <title>WMSU Bus Announcements</title>
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../user/styles/styles.css">
     <style>
         .announcement-card { border-radius:8px; padding:16px; margin-bottom:16px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
         .announcement-meta { font-size:0.9rem; color:#666; margin-top:10px; }
     </style>
 </head>
 <body>
-<header>
-    <nav>
-        <a href="schedule_view.php">Schedules</a>
-    <a href="announcement_user.php" class="active">Announcements</a>
-        <a href="logout.php">Logout</a>
-    </nav>
-</header>
+<?php include __DIR__ . '/../includes/header.php'; ?>
 <div class="container">
     <h1>Official WMSU Bus Announcements</h1>
 
@@ -44,5 +38,6 @@ $announcements_result = $conn->query($announcements_query);
     <?php endif; ?>
 
 </div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>
